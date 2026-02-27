@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+
+{% block title %}Excluir Usuário — VisionHub{% endblock %}
+
+{% block content %}
+
+<div class="d-flex align-items-center gap-3 mb-4">
+  <a href="{% url 'accounts:usuario_lista' %}" class="btn btn-outline-secondary vh-btn-back" title="Voltar">
+    <i class="bi bi-arrow-left"></i>
+  </a>
+  <div>
+    <h4 class="fw-bold mb-0">Excluir Usuário</h4>
+    <small class="text-body-secondary">Esta ação é irreversível.</small>
+  </div>
+</div>
+
+<div class="vh-form-card" style="max-width:600px;">
+  <div class="vh-form-card-header d-flex align-items-center gap-3">
+    <div class="vh-icon-box vh-icon-rose">
+      <i class="bi bi-exclamation-triangle-fill"></i>
+    </div>
+    <div>
+      <h6 class="fw-bold mb-0">Confirmar Exclusão</h6>
+      <small class="text-body-secondary">Verifique os dados antes de prosseguir</small>
+    </div>
+  </div>
+
+  <div class="vh-form-card-body text-center py-4">
+    <div class="bg-danger bg-opacity-10 text-danger rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width:64px;height:64px;">
+      <i class="bi bi-person-x-fill fs-2"></i>
+    </div>
+    <h6 class="fw-bold">{{ usuario_obj.get_full_name|default:usuario_obj.username }}</h6>
+    <p class="text-body-secondary small mb-0">
+      @{{ usuario_obj.username }} &middot; {{ usuario_obj.email|default:"Sem e-mail" }}
+    </p>
+  </div>
+
+  <div class="vh-form-card-footer">
+    <form method="post">
+      {% csrf_token %}
+      <div class="d-flex justify-content-between align-items-center">
+        <a href="{% url 'accounts:usuario_lista' %}" class="btn btn-outline-secondary d-flex align-items-center gap-2">
+          <i class="bi bi-x-lg"></i> Cancelar
+        </a>
+        <button type="submit" class="btn btn-danger px-4 d-flex align-items-center gap-2">
+          <i class="bi bi-trash"></i> Excluir Usuário
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+{% endblock %}

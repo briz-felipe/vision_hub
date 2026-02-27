@@ -1,0 +1,285 @@
+{% extends "base.html" %}
+{% load humanize %}
+
+{% block title %}Chamado #{{ chamado.pk }}{% endblock %}
+
+{% block content %}
+<!-- Header -->
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+  <div class="d-flex align-items-center gap-3">
+    <a href="{% url 'chamados:lista' %}" class="btn btn-outline-secondary vh-btn-back" title="Voltar">
+      <i class="bi bi-arrow-left"></i>
+    </a>
+    <div>
+      <h4 class="fw-bold mb-0">{{ chamado.titulo }}</h4>
+      <small class="text-body-secondary">Chamado #{{ chamado.pk }} — Criado em {{ chamado.criado_em|date:"d/m/Y H:i" }}</small>
+    </div>
+  </div>
+  <div class="d-flex gap-2">
+    <a href="{% url 'chamados:editar' chamado.pk %}" class="btn btn-primary btn-sm">
+      <i class="bi bi-pencil-square"></i> Editar
+    </a>
+    <a href="{% url 'chamados:excluir' chamado.pk %}" class="btn btn-outline-danger btn-sm">
+      <i class="bi bi-trash3"></i> Excluir
+    </a>
+  </div>
+</div>
+
+<!-- Detalhes -->
+<div class="vh-form-card mb-4">
+  <div class="vh-form-card-header d-flex justify-content-between align-items-center">
+    <div class="d-flex align-items-center gap-3">
+      <div class="vh-icon-box vh-icon-indigo"><i class="bi bi-info-circle"></i></div>
+      <div>
+        <h6 class="fw-bold mb-0">Detalhes da Ocorrência</h6>
+        <small class="text-body-secondary">Informações gerais do chamado</small>
+      </div>
+    </div>
+    <div class="d-flex gap-1">
+      {% if chamado.status == 'aberto' %}
+        <span class="badge rounded-pill text-bg-primary">{{ chamado.get_status_display }}</span>
+      {% elif chamado.status == 'em_andamento' %}
+        <span class="badge rounded-pill text-bg-info">{{ chamado.get_status_display }}</span>
+      {% elif chamado.status == 'resolvido' %}
+        <span class="badge rounded-pill text-bg-success">{{ chamado.get_status_display }}</span>
+      {% else %}
+        <span class="badge rounded-pill text-bg-secondary">{{ chamado.get_status_display }}</span>
+      {% endif %}
+
+      {% if chamado.prioridade == 'baixa' %}
+        <span class="badge rounded-pill text-bg-success">{{ chamado.get_prioridade_display }}</span>
+      {% elif chamado.prioridade == 'media' %}
+        <span class="badge rounded-pill text-bg-warning">{{ chamado.get_prioridade_display }}</span>
+      {% elif chamado.prioridade == 'alta' %}
+        <span class="badge rounded-pill text-bg-danger">{{ chamado.get_prioridade_display }}</span>
+      {% else %}
+        <span class="badge rounded-pill text-bg-dark">{{ chamado.get_prioridade_display }}</span>
+      {% endif %}
+    </div>
+  </div>
+  <div class="vh-form-card-body">
+    <div class="vh-section">
+      <div class="vh-section-title"><i class="bi bi-list-check"></i> Resumo</div>
+      <div class="row g-3 mb-3 align-items-center">
+        <div class="col-12 col-md-6 col-lg-3">
+          <div class="small text-body-secondary">Cliente</div>
+          <a href="{% url 'clientes:detalhe' chamado.cliente.pk %}" class="fw-semibold text-decoration-none">{{ chamado.cliente.nome }}</a>
+          {% if chamado.cliente.nome_fantasia %}
+            <div class="small text-body-secondary">{{ chamado.cliente.nome_fantasia }}</div>
+          {% endif %}
+        </div>
+        <div class="col-12 col-md-6 col-lg-5">
+          <div class="small text-body-secondary">Endereço</div>
+          <div class="text-truncate">{{ chamado.cliente.endereco_completo }}</div>
+        </div>
+        <div class="col-6 col-md-3 col-lg-2">
+          <div class="small text-body-secondary">Total de Vídeos</div>
+          <div class="fw-semibold">{{ chamado.total_videos }}</div>
+        </div>
+        <div class="col-6 col-md-3 col-lg-2">
+          <div class="small text-body-secondary">Atualizado em</div>
+          <div>{{ chamado.atualizado_em|date:"d/m/Y H:i" }}</div>
+        </div>
+      </div>
+    </div>
+
+    {% if chamado.descricao %}
+    <div class="vh-section mt-2">
+      <div class="vh-section-title"><i class="bi bi-card-text"></i> Descrição</div>
+      <div class="mt-2"><p class="mb-0" style="white-space:pre-wrap;">{{ chamado.descricao }}</p></div>
+    </div>
+    {% endif %}
+
+    <!-- Mudar Status -->
+    <div class="vh-section mt-3">
+      <div class="vh-section-title"><i class="bi bi-sliders"></i> Mudar Status</div>
+      <div class="mt-2">
+        <form method="post" action="{% url 'chamados:mudar_status' chamado.pk %}" role="group" class="d-inline-flex gap-2 flex-wrap">
+          {% csrf_token %}
+          <button type="submit" name="status" value="aberto" class="btn btn-sm {% if chamado.status == 'aberto' %}btn-primary{% else %}btn-outline-primary{% endif %}">Aberto</button>
+          <button type="submit" name="status" value="em_andamento" class="btn btn-sm {% if chamado.status == 'em_andamento' %}btn-info{% else %}btn-outline-info{% endif %}">Em Andamento</button>
+          <button type="submit" name="status" value="resolvido" class="btn btn-sm {% if chamado.status == 'resolvido' %}btn-success{% else %}btn-outline-success{% endif %}">Resolvido</button>
+          <button type="submit" name="status" value="fechado" class="btn btn-sm {% if chamado.status == 'fechado' %}btn-secondary{% else %}btn-outline-secondary{% endif %}">Fechado</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Compartilhamento -->
+<div class="vh-form-card mb-4">
+  <div class="vh-form-card-header d-flex justify-content-between align-items-center">
+    <div class="d-flex align-items-center gap-3">
+      <div class="vh-icon-box vh-icon-blue"><i class="bi bi-share"></i></div>
+      <div>
+        <h6 class="fw-bold mb-0">Compartilhamento</h6>
+        <small class="text-body-secondary">Link e opções de acesso</small>
+      </div>
+    </div>
+    {% if chamado.tipo_compartilhamento == 'publico' %}
+      <span class="badge rounded-pill text-bg-success">{{ chamado.get_tipo_compartilhamento_display }}</span>
+    {% elif chamado.tipo_compartilhamento == 'temporario' %}
+      <span class="badge rounded-pill text-bg-warning">{{ chamado.get_tipo_compartilhamento_display }}</span>
+    {% else %}
+      <span class="badge rounded-pill text-bg-primary">{{ chamado.get_tipo_compartilhamento_display }}</span>
+    {% endif %}
+  </div>
+  <div class="vh-form-card-body">
+    <div class="input-group mb-2">
+      <span class="input-group-text"><i class="bi bi-link-45deg"></i></span>
+      <input type="text" id="share-link" value="{{ share_url }}" class="form-control" readonly>
+      <button onclick="copyLink('share-link')" class="btn btn-outline-secondary">
+        <i class="bi bi-clipboard"></i> Copiar
+      </button>
+    </div>
+    {% if chamado.tipo_compartilhamento == 'temporario' %}
+      <small class="{% if chamado.link_expirado %}text-danger{% else %}text-body-secondary{% endif %}">
+        {% if chamado.link_expirado %}
+          <i class="bi bi-exclamation-triangle-fill"></i> Link expirado em {{ chamado.expira_em|date:"d/m/Y H:i" }}
+        {% else %}
+          <i class="bi bi-clock"></i> Expira em: {{ chamado.expira_em|date:"d/m/Y H:i" }}
+        {% endif %}
+      </small>
+    {% endif %}
+    {% if chamado.tipo_compartilhamento == 'protegido' %}
+      <small class="text-body-secondary">
+        <i class="bi bi-key"></i> Senha de acesso: <code class="bg-light px-2 py-1 rounded">{{ chamado.senha_compartilhamento }}</code>
+      </small>
+    {% endif %}
+  </div>
+</div>
+
+<!-- Upload de Vídeos -->
+<div class="vh-form-card mb-4">
+  <div class="vh-form-card-header d-flex align-items-center gap-3">
+    <div class="vh-icon-box vh-icon-teal"><i class="bi bi-cloud-arrow-up"></i></div>
+    <div>
+      <h6 class="fw-bold mb-0">Enviar Vídeos</h6>
+      <small class="text-body-secondary">Envie arquivos em lote para este chamado</small>
+    </div>
+  </div>
+  <div class="vh-form-card-body">
+    <form method="post" action="{% url 'chamados:upload_video' chamado.pk %}" enctype="multipart/form-data">
+      {% csrf_token %}
+      <div class="row g-3 mb-3">
+        <div class="col-md-6">
+          <label class="form-label fw-semibold">Arquivos de Vídeo</label>
+          <input type="file" name="arquivos" class="form-control" accept="video/*" multiple>
+          <div class="form-text">Formatos: .mp4, .mov, .avi, .mkv, .wmv, .webm | Máx: 500 MB por arquivo</div>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label fw-semibold">Descrição (opcional)</label>
+          {{ video_form.descricao }}
+        </div>
+      </div>
+      <button type="submit" class="btn btn-primary">
+        <i class="bi bi-upload"></i> Enviar Vídeos
+      </button>
+    </form>
+  </div>
+</div>
+
+<!-- Lista de Vídeos -->
+<div class="vh-form-card mb-4">
+  <div class="vh-form-card-header d-flex align-items-center gap-3">
+    <div class="vh-icon-box vh-icon-indigo"><i class="bi bi-camera-video"></i></div>
+    <div>
+      <h6 class="fw-bold mb-0">Vídeos ({{ videos|length }})</h6>
+      <small class="text-body-secondary">Reproduza ou exclua vídeos enviados</small>
+    </div>
+  </div>
+  {% if videos %}
+  <div class="vh-form-card-body">
+    <div class="row g-3">
+      {% for video in videos %}
+        <div class="col-lg-6">
+        <div class="card border-0 h-100 shadow-sm">
+          <video class="vh-video-player rounded-3" controls preload="metadata">
+            <source src="{{ video.arquivo.url }}" type="video/mp4">
+            Seu navegador não suporta vídeo HTML5.
+          </video>
+          <div class="card-body py-2">
+            <h6 class="fw-semibold small mb-1">{{ video.nome_original }}</h6>
+            {% if video.descricao %}
+            <p class="text-body-secondary small mb-1">{{ video.descricao }}</p>
+            {% endif %}
+            <div class="d-flex gap-2 text-body-secondary small">
+              <span>{{ video.tamanho_formatado }}</span>
+              <span>{{ video.extensao }}</span>
+              <span>{{ video.enviado_em|date:"d/m/Y H:i" }}</span>
+            </div>
+          </div>
+          <div class="card-footer bg-transparent border-top py-2">
+            <form method="post" action="{% url 'chamados:excluir_video' video.pk %}" onsubmit="return confirm('Excluir este vídeo?');">
+              {% csrf_token %}
+              <button type="submit" class="btn btn-outline-danger btn-sm">
+                <i class="bi bi-trash3"></i> Excluir
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  {% else %}
+  <div class="vh-form-card-body">
+    <div class="text-center py-5 text-body-secondary">
+      <i class="bi bi-camera-video-off fs-1 d-block mb-2"></i>
+      <p class="mb-0">Nenhum vídeo ainda. Use o formulário acima para enviar.</p>
+    </div>
+  </div>
+  {% endif %}
+</div>
+
+<!-- Comentários -->
+<div class="vh-form-card">
+  <div class="vh-form-card-header d-flex align-items-center gap-3">
+    <div class="vh-icon-box vh-icon-indigo"><i class="bi bi-chat-dots"></i></div>
+    <div>
+      <h6 class="fw-bold mb-0">Comentários ({{ comentarios|length }})</h6>
+      <small class="text-body-secondary">Discussões e observações sobre o chamado</small>
+    </div>
+  </div>
+  <div class="vh-form-card-body">
+    {% if comentarios %}
+    <div class="list-group mb-3">
+      {% for comentario in comentarios %}
+      <div class="list-group-item py-3">
+        <div class="d-flex justify-content-between align-items-start mb-1">
+          <div>
+            <strong>{{ comentario.autor_display }}</strong>
+            {% if comentario.autor_usuario %}
+              <span class="badge text-bg-primary ms-1" style="font-size:11px;">Equipe</span>
+            {% else %}
+              <span class="badge text-bg-info ms-1" style="font-size:11px;">Público</span>
+            {% endif %}
+          </div>
+          <small class="text-body-secondary">{{ comentario.criado_em|date:"d/m/Y H:i" }}</small>
+        </div>
+        <p class="mb-0" style="white-space:pre-wrap;">{{ comentario.texto }}</p>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="text-body-secondary mb-3">Nenhum comentário ainda.</div>
+    {% endif %}
+
+    <!-- Novo comentário -->
+    <form method="post" action="{% url 'chamados:adicionar_comentario' chamado.pk %}">
+      {% csrf_token %}
+      <div class="mb-3">
+        <label class="form-label fw-semibold">Adicionar Comentário</label>
+        {{ comentario_form.texto }}
+        {% if comentario_form.texto.errors %}
+          <div class="text-danger small mt-1">{{ comentario_form.texto.errors.0 }}</div>
+        {% endif %}
+        <div class="form-text">Este comentário será visível apenas para a equipe interna.</div>
+      </div>
+      <button type="submit" class="btn btn-primary">
+        <i class="bi bi-send"></i> Enviar Comentário
+      </button>
+    </form>
+  </div>
+</div>
+{% endblock %}

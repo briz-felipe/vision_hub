@@ -1,0 +1,161 @@
+{% extends 'base.html' %}
+
+{% block title %}Mudar Senha - VisionHub{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-6 col-lg-5">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0 text-center">
+                        <i class="bi bi-lock"></i> Mudar Senha
+                    </h4>
+                </div>
+                <div class="card-body p-4">
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        {% if form.non_field_errors %}
+                            <div class="alert alert-danger">
+                                {{ form.non_field_errors }}
+                            </div>
+                        {% endif %}
+
+                        <div class="mb-3">
+                            <label for="{{ form.old_password.id_for_label }}" class="form-label">
+                                {{ form.old_password.label }} *
+                            </label>
+                            {{ form.old_password }}
+                            {% if form.old_password.errors %}
+                                <div class="text-danger small">{{ form.old_password.errors }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="{{ form.new_password1.id_for_label }}" class="form-label">
+                                {{ form.new_password1.label }} *
+                            </label>
+                            {{ form.new_password1 }}
+                            {% if form.new_password1.errors %}
+                                <div class="text-danger small">{{ form.new_password1.errors }}</div>
+                            {% endif %}
+                            <!-- <small class="form-text text-muted">{{ form.new_password1.help_text }}</small> -->
+
+                            <!-- Password rules checklist -->
+                            <ul class="list-unstyled mt-3" id="password-rules" style="max-width:360px;">
+                                <li class="d-flex align-items-start gap-2 mb-1 password-rule" data-rule="length">
+                                    <i class="bi bi-circle me-1 text-muted rule-icon"></i>
+                                    <small class="text-muted">Ao menos 8 caracteres</small>
+                                </li>
+                                <li class="d-flex align-items-start gap-2 mb-1 password-rule" data-rule="lower">
+                                    <i class="bi bi-circle me-1 text-muted rule-icon"></i>
+                                    <small class="text-muted">Uma letra minúscula</small>
+                                </li>
+                                <li class="d-flex align-items-start gap-2 mb-1 password-rule" data-rule="upper">
+                                    <i class="bi bi-circle me-1 text-muted rule-icon"></i>
+                                    <small class="text-muted">Uma letra maiúscula</small>
+                                </li>
+                                <li class="d-flex align-items-start gap-2 mb-1 password-rule" data-rule="number">
+                                    <i class="bi bi-circle me-1 text-muted rule-icon"></i>
+                                    <small class="text-muted">Um número</small>
+                                </li>
+                                <li class="d-flex align-items-start gap-2 mb-1 password-rule" data-rule="special">
+                                    <i class="bi bi-circle me-1 text-muted rule-icon"></i>
+                                    <small class="text-muted">Um caractere especial (ex: !@#$%)</small>
+                                </li>
+                                <!-- <li class="d-flex align-items-start gap-2 mb-1 password-rule" data-rule="common">
+                                    <i class="bi bi-circle me-1 text-muted rule-icon"></i>
+                                    <small class="text-muted">Não seja uma senha muito comum</small>
+                                </li> -->
+                                <li class="d-flex align-items-start gap-2 mb-1 password-rule" data-rule="match">
+                                    <i class="bi bi-circle me-1 text-muted rule-icon"></i>
+                                    <small class="text-muted">Confirmação coincide</small>
+                                </li>
+                            </ul>
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="{{ form.new_password2.id_for_label }}" class="form-label">
+                                {{ form.new_password2.label }} *
+                            </label>
+                            {{ form.new_password2 }}
+                            {% if form.new_password2.errors %}
+                                <div class="text-danger small">{{ form.new_password2.errors }}</div>
+                            {% endif %}
+                            <small class="form-text text-muted">{{ form.new_password2.help_text }}</small>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" id="btn-change-password" class="btn btn-primary btn-lg" disabled>
+                                <i class="bi bi-check-circle"></i> Alterar Senha
+                            </button>
+                            <a href="{% url 'dashboard:index' %}" class="btn btn-outline-secondary">
+                                <i class="bi bi-x-circle"></i> Cancelar
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div class="text-center mt-3">
+                <p class="text-muted small">
+                    <i class="bi bi-info-circle"></i> Sua senha deve conter pelo menos 8 caracteres e não pode ser muito comum.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+        {% block extra_js %}
+        <script>
+        document.addEventListener('DOMContentLoaded', function(){
+            const pwd1 = document.getElementById('{{ form.new_password1.id_for_label }}');
+            const pwd2 = document.getElementById('{{ form.new_password2.id_for_label }}');
+            const btn = document.getElementById('btn-change-password');
+            const rules = Array.from(document.querySelectorAll('#password-rules .password-rule'));
+
+            // common weak password list (small, client-side check)
+            const common = ['12345678','password','qwerty','123456','abc123','senha','123456789','11111111','123123'];
+
+            function testRules() {
+                const v = pwd1.value || '';
+                const v2 = pwd2.value || '';
+                const checks = {
+                    length: v.length >= 8,
+                    lower: /[a-z]/.test(v),
+                    upper: /[A-Z]/.test(v),
+                    number: /[0-9]/.test(v),
+                    special: /[^A-Za-z0-9]/.test(v),
+                    common: !common.includes(v.toLowerCase()),
+                    match: v !== '' && v === v2,
+                };
+
+                let all = true;
+                rules.forEach(li => {
+                    const rule = li.dataset.rule;
+                    const ok = !!checks[rule];
+                    const icon = li.querySelector('.rule-icon');
+                    const text = li.querySelector('small');
+                    if (ok) {
+                        icon.className = 'bi bi-check-circle-fill text-success me-1 rule-icon';
+                        text.classList.remove('text-muted');
+                        text.classList.add('text-success');
+                    } else {
+                        icon.className = 'bi bi-circle text-muted me-1 rule-icon';
+                        text.classList.remove('text-success');
+                        text.classList.add('text-muted');
+                        all = false;
+                    }
+                });
+
+                btn.disabled = !all;
+            }
+
+            if (pwd1) pwd1.addEventListener('input', testRules);
+            if (pwd2) pwd2.addEventListener('input', testRules);
+            testRules();
+        });
+        </script>
+        {% endblock %}

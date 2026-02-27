@@ -1,0 +1,219 @@
+{% extends 'base.html' %}
+
+{% block title %}Clientes - VisionHub{% endblock %}
+
+{% block content %}
+<!-- Header -->
+<div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
+    <div>
+        <h4 class="fw-bold mb-0"><i class="bi bi-people me-2 text-primary"></i>Clientes</h4>
+        <small class="text-body-secondary">Gerencie a carteira de clientes cadastrados</small>
+    </div>
+    <a href="{% url 'clientes:criar' %}" class="btn btn-primary">
+        <i class="bi bi-plus-lg"></i> Novo Cliente
+    </a>
+</div>
+
+<!-- Stats -->
+<div class="row g-3 mb-4">
+    <div class="col-sm-4">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body d-flex align-items-center gap-3 py-3">
+                <div class="bg-primary bg-opacity-10 text-primary rounded-3 d-flex align-items-center justify-content-center" style="width:40px;height:40px;">
+                    <i class="bi bi-people fs-5"></i>
+                </div>
+                <div>
+                    <h5 class="fw-bold mb-0">{{ total_clientes|default:clientes|length }}</h5>
+                    <small class="text-body-secondary">Total</small>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-4">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body d-flex align-items-center gap-3 py-3">
+                <div class="bg-info bg-opacity-10 text-info rounded-3 d-flex align-items-center justify-content-center" style="width:40px;height:40px;">
+                    <i class="bi bi-person fs-5"></i>
+                </div>
+                <div>
+                    <h5 class="fw-bold mb-0">{{ total_pf|default:"—" }}</h5>
+                    <small class="text-body-secondary">Pessoa Física</small>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-4">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body d-flex align-items-center gap-3 py-3">
+                <div class="bg-success bg-opacity-10 text-success rounded-3 d-flex align-items-center justify-content-center" style="width:40px;height:40px;">
+                    <i class="bi bi-building fs-5"></i>
+                </div>
+                <div>
+                    <h5 class="fw-bold mb-0">{{ total_pj|default:"—" }}</h5>
+                    <small class="text-body-secondary">Pessoa Jurídica</small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Search -->
+<div class="card border-0 shadow-sm mb-4">
+    <div class="card-body">
+        <form method="get">
+            <div class="row g-3 align-items-end">
+                <div class="col-md-6">
+                    <label class="form-label small fw-semibold">Busca</label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-light"><i class="bi bi-search text-body-secondary"></i></span>
+                        <input type="text" name="q" class="form-control"
+                               placeholder="Nome, CPF, CNPJ, e-mail ou telefone..."
+                               value="{{ query }}">
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label small fw-semibold">Tipo</label>
+                    <select name="tipo" class="form-select">
+                        <option value="">Todos</option>
+                        <option value="pf" {% if tipo_filtro == 'pf' %}selected{% endif %}>Pessoa Física</option>
+                        <option value="pj" {% if tipo_filtro == 'pj' %}selected{% endif %}>Pessoa Jurídica</option>
+                    </select>
+                </div>
+                <div class="col-md-3 d-flex gap-2">
+                    <button type="submit" class="btn btn-primary flex-grow-1">
+                        <i class="bi bi-funnel"></i> Filtrar
+                    </button>
+                    {% if query or tipo_filtro %}
+                        <a href="{% url 'clientes:lista' %}" class="btn btn-outline-secondary" title="Limpar filtros">
+                            <i class="bi bi-x-lg"></i>
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Table / Empty -->
+<div class="card border-0 shadow-sm">
+    {% if clientes %}
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th style="width:50px;"></th>
+                    <th>Cliente</th>
+                    <th>Documento</th>
+                    <th>Localização</th>
+                    <th>Contato</th>
+                    <th style="width:100px;">Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for cliente in clientes %}
+                <tr>
+                    <td>
+                        <span class="d-inline-flex align-items-center justify-content-center rounded-3 fw-bold small
+                            {% if cliente.tipo_pessoa == 'pf' %}bg-primary bg-opacity-10 text-primary{% else %}bg-success bg-opacity-10 text-success{% endif %}"
+                            style="width:36px;height:36px;">
+                            {{ cliente.nome|slice:":1"|upper }}
+                        </span>
+                    </td>
+                    <td>
+                        <a href="{% url 'clientes:detalhe' cliente.pk %}" class="text-decoration-none text-dark fw-semibold">
+                            {{ cliente.nome }}
+                        </a>
+                        {% if cliente.nome_fantasia %}
+                            <div class="text-body-secondary small">{{ cliente.nome_fantasia }}</div>
+                        {% endif %}
+                        <span class="badge rounded-pill mt-1
+                            {% if cliente.tipo_pessoa == 'pf' %}text-bg-primary{% else %}text-bg-success{% endif %}"
+                            style="font-size:.65rem;">
+                            {% if cliente.tipo_pessoa == 'pf' %}PF{% else %}PJ{% endif %}
+                        </span>
+                    </td>
+                    <td class="font-monospace text-body-secondary small">
+                        {% if cliente.tipo_pessoa == 'pf' %}{{ cliente.cpf }}{% else %}{{ cliente.cnpj }}{% endif %}
+                    </td>
+                    <td>
+                        <div class="fw-semibold small">{{ cliente.cidade }}</div>
+                        <div class="text-body-secondary small">{{ cliente.estado }}</div>
+                    </td>
+                    <td>
+                        <div class="small">{{ cliente.telefone }}</div>
+                        {% if cliente.email %}
+                            <div class="text-body-secondary small">{{ cliente.email }}</div>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <div class="d-flex gap-1">
+                            <a href="{% url 'clientes:detalhe' cliente.pk %}"
+                               class="btn btn-sm btn-outline-primary" title="Ver detalhes">
+                                <i class="bi bi-eye"></i>
+                            </a>
+                            <a href="{% url 'clientes:editar' cliente.pk %}"
+                               class="btn btn-sm btn-outline-secondary" title="Editar">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {% if clientes.has_other_pages %}
+    <div class="card-footer bg-transparent py-3">
+        <nav>
+            <ul class="pagination pagination-sm mb-0 justify-content-center">
+                {% if clientes.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ clientes.previous_page_number }}{% if query %}&q={{ query }}{% endif %}{% if tipo_filtro %}&tipo={{ tipo_filtro }}{% endif %}">
+                        <i class="bi bi-chevron-left"></i>
+                    </a>
+                </li>
+                {% endif %}
+                {% for num in clientes.paginator.page_range %}
+                    {% if clientes.number == num %}
+                        <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+                    {% elif num > clientes.number|add:'-3' and num < clientes.number|add:'3' %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ num }}{% if query %}&q={{ query }}{% endif %}{% if tipo_filtro %}&tipo={{ tipo_filtro }}{% endif %}">{{ num }}</a>
+                        </li>
+                    {% endif %}
+                {% endfor %}
+                {% if clientes.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ clientes.next_page_number }}{% if query %}&q={{ query }}{% endif %}{% if tipo_filtro %}&tipo={{ tipo_filtro }}{% endif %}">
+                        <i class="bi bi-chevron-right"></i>
+                    </a>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
+    </div>
+    {% endif %}
+
+    {% else %}
+    <div class="card-body text-center py-5">
+        <div class="bg-primary bg-opacity-10 text-primary rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width:64px;height:64px;">
+            <i class="bi bi-people fs-2"></i>
+        </div>
+        {% if query or tipo_filtro %}
+            <h6 class="fw-bold">Nenhum cliente encontrado</h6>
+            <p class="text-body-secondary small">Nenhum resultado para os filtros aplicados. Tente outros termos ou limpe os filtros.</p>
+            <a href="{% url 'clientes:lista' %}" class="btn btn-outline-secondary btn-sm">
+                <i class="bi bi-x-circle"></i> Limpar filtros
+            </a>
+        {% else %}
+            <h6 class="fw-bold">Nenhum cliente cadastrado</h6>
+            <p class="text-body-secondary small">Comece cadastrando seu primeiro cliente para gerenciar chamados.</p>
+            <a href="{% url 'clientes:criar' %}" class="btn btn-primary btn-sm">
+                <i class="bi bi-plus-lg"></i> Cadastrar Primeiro Cliente
+            </a>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

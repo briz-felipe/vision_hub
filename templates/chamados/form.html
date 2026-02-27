@@ -1,0 +1,149 @@
+{% extends "base.html" %}
+
+{% block title %}{{ titulo_pagina }} — VisionHub{% endblock %}
+
+{% block content %}
+
+<!-- ═══ Page header ═══ -->
+<div class="d-flex align-items-center justify-content-between mb-4">
+  <div class="d-flex align-items-center gap-3">
+    <a href="{% url 'chamados:lista' %}" class="btn btn-outline-secondary vh-btn-back" title="Voltar">
+      <i class="bi bi-arrow-left"></i>
+    </a>
+    <div>
+      <h4 class="fw-bold mb-0">{{ titulo_pagina }}</h4>
+      <small class="text-body-secondary">Preencha os dados da ocorrência e as configurações de acesso.</small>
+    </div>
+  </div>
+</div>
+
+{% if form.non_field_errors %}
+<div class="alert alert-danger d-flex align-items-center gap-2 mb-4">
+  <i class="bi bi-exclamation-triangle-fill flex-shrink-0"></i>
+  <div>{% for error in form.non_field_errors %}<p class="mb-0">{{ error }}</p>{% endfor %}</div>
+</div>
+{% endif %}
+
+<!-- ═══ Main form card ═══ -->
+<form method="post" novalidate>
+  {% csrf_token %}
+
+  <div class="vh-form-card">
+    <!-- Card header -->
+    <div class="vh-form-card-header d-flex align-items-center gap-3">
+      <div class="vh-icon-box vh-icon-indigo">
+        <i class="bi bi-clipboard2-pulse"></i>
+      </div>
+      <div>
+        <h6 class="fw-bold mb-0">Dados do Chamado</h6>
+        <small class="text-body-secondary">Informações da ocorrência e regras de compartilhamento</small>
+      </div>
+    </div>
+
+    <!-- Card body -->
+    <div class="vh-form-card-body">
+
+      <!-- Row 1: Ocorrência + Status/Cliente -->
+      <div class="row g-4 mb-4">
+
+        <!-- ── Informações da Ocorrência ── -->
+        <div class="col-lg-7">
+          <div class="vh-section h-100">
+            <div class="vh-section-title">
+              <i class="bi bi-file-earmark-text"></i> Informações da Ocorrência
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label" for="id_titulo">{{ form.titulo.label }} <span class="text-primary">*</span></label>
+              {{ form.titulo }}
+              {% if form.titulo.errors %}<div class="text-danger small mt-1">{{ form.titulo.errors.0 }}</div>{% endif %}
+            </div>
+
+            <div class="mb-0">
+              <label class="form-label" for="id_descricao">{{ form.descricao.label }}</label>
+              {{ form.descricao }}
+              {% if form.descricao.errors %}<div class="text-danger small mt-1">{{ form.descricao.errors.0 }}</div>{% endif %}
+            </div>
+          </div>
+        </div>
+
+        <!-- ── Cliente & Status ── -->
+        <div class="col-lg-5">
+          <div class="vh-section h-100">
+            <div class="vh-section-title">
+              <i class="bi bi-sliders"></i> Classificação
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label" for="id_cliente">{{ form.cliente.label }} <span class="text-primary">*</span></label>
+              {{ form.cliente }}
+              {% if form.cliente.errors %}<div class="text-danger small mt-1">{{ form.cliente.errors.0 }}</div>{% endif %}
+              <div class="text-body-secondary small mt-1"><i class="bi bi-info-circle me-1"></i>Selecione o cliente vinculado</div>
+            </div>
+
+            <div class="row g-3">
+              <div class="col-sm-6">
+                <label class="form-label" for="id_status">{{ form.status.label }}</label>
+                {{ form.status }}
+              </div>
+              <div class="col-sm-6">
+                <label class="form-label" for="id_prioridade">{{ form.prioridade.label }}</label>
+                {{ form.prioridade }}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Row 2: Compartilhamento (full width) -->
+      <div class="vh-section">
+        <div class="vh-section-title">
+          <i class="bi bi-share"></i> Configurações de Compartilhamento
+        </div>
+
+        <div class="row g-3">
+          <!-- Tipo -->
+          <div class="col-md-4">
+            <label class="form-label" for="id_tipo_compartilhamento">{{ form.tipo_compartilhamento.label }}</label>
+            {{ form.tipo_compartilhamento }}
+            <div class="text-body-secondary small mt-1"><i class="bi bi-info-circle me-1"></i>Como o chamado será acessível externamente</div>
+          </div>
+
+          <!-- Senha -->
+          <div class="col-md-4" id="group-senha">
+            <label class="form-label" for="id_senha_compartilhamento">{{ form.senha_compartilhamento.label }}</label>
+            <div class="input-group">
+              <span class="input-group-text"><i class="bi bi-lock"></i></span>
+              {{ form.senha_compartilhamento }}
+            </div>
+            {% if form.senha_compartilhamento.errors %}<div class="text-danger small mt-1">{{ form.senha_compartilhamento.errors.0 }}</div>{% endif %}
+          </div>
+
+          <!-- Expiração -->
+          <div class="col-md-4" id="group-expira">
+            <label class="form-label" for="id_expira_em">{{ form.expira_em.label }}</label>
+            <div class="input-group">
+              <span class="input-group-text"><i class="bi bi-calendar-event"></i></span>
+              {{ form.expira_em }}
+            </div>
+            {% if form.expira_em.errors %}<div class="text-danger small mt-1">{{ form.expira_em.errors.0 }}</div>{% endif %}
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Card footer / actions -->
+    <div class="vh-form-card-footer d-flex justify-content-between align-items-center">
+      <a href="{% url 'chamados:lista' %}" class="btn btn-outline-secondary d-flex align-items-center gap-2">
+        <i class="bi bi-x-lg"></i> Cancelar
+      </a>
+      <button type="submit" class="btn btn-primary px-4 d-flex align-items-center gap-2 vh-btn-submit">
+        <i class="bi bi-check-lg"></i> Salvar
+      </button>
+    </div>
+  </div>
+
+</form>
+
+{% endblock %}

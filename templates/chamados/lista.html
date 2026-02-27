@@ -1,0 +1,144 @@
+{% extends "base.html" %}
+
+{% block title %}Chamados{% endblock %}
+
+{% block content %}
+<!-- Header -->
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+  <div>
+    <h5 class="fw-bold mb-0">Chamados</h5>
+    <small class="text-body-secondary">Gerencie ocorrências de monitoramento</small>
+  </div>
+  <a href="{% url 'chamados:criar' %}" class="btn btn-primary">
+    <i class="bi bi-plus-circle"></i> Novo Chamado
+  </a>
+</div>
+
+<!-- Filtros -->
+<div class="card border-0 shadow-sm mb-4">
+  <div class="card-body">
+    <form method="get" class="row g-2 align-items-end">
+      <div class="col-lg">
+        <div class="input-group">
+          <span class="input-group-text"><i class="bi bi-search"></i></span>
+          <input type="text" name="q" value="{{ query }}" class="form-control" placeholder="Pesquisar por título, cliente, descrição...">
+        </div>
+      </div>
+      <div class="col-auto">
+        <select name="status" class="form-select">
+          <option value="">Todos os Status</option>
+          {% for value, label in status_choices %}
+          <option value="{{ value }}" {% if status_filtro == value %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-auto">
+        <select name="prioridade" class="form-select">
+          <option value="">Todas Prioridades</option>
+          {% for value, label in prioridade_choices %}
+          <option value="{{ value }}" {% if prioridade_filtro == value %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-auto d-flex gap-2">
+        <button type="submit" class="btn btn-secondary">
+          <i class="bi bi-funnel"></i> Filtrar
+        </button>
+        {% if query or status_filtro or prioridade_filtro %}
+        <a href="{% url 'chamados:lista' %}" class="btn btn-outline-secondary btn-sm">Limpar</a>
+        {% endif %}
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Tabela -->
+<div class="card border-0 shadow-sm">
+  <div class="table-responsive">
+    <table class="table table-hover align-middle mb-0">
+      <thead class="table-light">
+        <tr>
+          <th class="ps-3">#</th>
+          <th>Título</th>
+          <th>Cliente</th>
+          <th>Status</th>
+          <th>Prioridade</th>
+          <th>Compartilhamento</th>
+          <th>Vídeos</th>
+          <th>Data</th>
+          <th class="text-end pe-3">Ações</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for chamado in chamados %}
+        <tr>
+          <td class="ps-3 text-body-secondary">{{ chamado.pk }}</td>
+          <td>
+            <a href="{% url 'chamados:detalhe' chamado.pk %}" class="fw-semibold text-decoration-none link-dark">
+              {{ chamado.titulo }}
+            </a>
+          </td>
+          <td>{{ chamado.cliente }}</td>
+          <td>
+            {% if chamado.status == 'aberto' %}
+              <span class="badge rounded-pill text-bg-primary">{{ chamado.get_status_display }}</span>
+            {% elif chamado.status == 'em_andamento' %}
+              <span class="badge rounded-pill text-bg-info">{{ chamado.get_status_display }}</span>
+            {% elif chamado.status == 'resolvido' %}
+              <span class="badge rounded-pill text-bg-success">{{ chamado.get_status_display }}</span>
+            {% else %}
+              <span class="badge rounded-pill text-bg-secondary">{{ chamado.get_status_display }}</span>
+            {% endif %}
+          </td>
+          <td>
+            {% if chamado.prioridade == 'baixa' %}
+              <span class="badge rounded-pill text-bg-success">{{ chamado.get_prioridade_display }}</span>
+            {% elif chamado.prioridade == 'media' %}
+              <span class="badge rounded-pill text-bg-warning">{{ chamado.get_prioridade_display }}</span>
+            {% elif chamado.prioridade == 'alta' %}
+              <span class="badge rounded-pill text-bg-danger">{{ chamado.get_prioridade_display }}</span>
+            {% else %}
+              <span class="badge rounded-pill text-bg-dark">{{ chamado.get_prioridade_display }}</span>
+            {% endif %}
+          </td>
+          <td>
+            {% if chamado.tipo_compartilhamento == 'publico' %}
+              <span class="badge rounded-pill text-bg-success">{{ chamado.get_tipo_compartilhamento_display }}</span>
+            {% elif chamado.tipo_compartilhamento == 'temporario' %}
+              <span class="badge rounded-pill text-bg-warning">{{ chamado.get_tipo_compartilhamento_display }}</span>
+            {% else %}
+              <span class="badge rounded-pill text-bg-primary">{{ chamado.get_tipo_compartilhamento_display }}</span>
+            {% endif %}
+          </td>
+          <td>{{ chamado.total_videos }}</td>
+          <td class="text-body-secondary">{{ chamado.criado_em|date:"d/m/Y" }}</td>
+          <td class="text-end pe-3">
+            <div class="d-flex gap-1 justify-content-end">
+              <a href="{% url 'chamados:detalhe' chamado.pk %}" class="btn btn-sm btn-outline-primary" title="Ver">
+                <i class="bi bi-eye"></i>
+              </a>
+              <a href="{% url 'chamados:editar' chamado.pk %}" class="btn btn-sm btn-outline-secondary" title="Editar">
+                <i class="bi bi-pencil-square"></i>
+              </a>
+            </div>
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="9">
+            <div class="text-center py-5 text-body-secondary">
+              <i class="bi bi-file-earmark-text fs-1 d-block mb-2"></i>
+              <h6 class="fw-bold">Nenhum chamado encontrado</h6>
+              <p class="mb-3">{% if query or status_filtro or prioridade_filtro %}Tente ajustar os filtros de pesquisa.{% else %}Crie seu primeiro chamado para começar.{% endif %}</p>
+              <a href="{% url 'chamados:criar' %}" class="btn btn-primary btn-sm">
+                <i class="bi bi-plus-circle"></i> Novo Chamado
+              </a>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

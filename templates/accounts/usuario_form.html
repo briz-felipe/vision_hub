@@ -1,0 +1,144 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ titulo_pagina }} — VisionHub{% endblock %}
+
+{% block content %}
+
+<!-- Page header -->
+<div class="d-flex align-items-center justify-content-between mb-4">
+  <div class="d-flex align-items-center gap-3">
+    <a href="{% url 'accounts:usuario_lista' %}" class="btn btn-outline-secondary vh-btn-back" title="Voltar">
+      <i class="bi bi-arrow-left"></i>
+    </a>
+    <div>
+      <h4 class="fw-bold mb-0">{{ titulo_pagina }}</h4>
+      <small class="text-body-secondary">
+        {% if form.instance.pk %}Atualize as informações do usuário.{% else %}Preencha os dados para criar um novo acesso.{% endif %}
+      </small>
+    </div>
+  </div>
+  {% if form.instance.pk %}
+  <span class="badge rounded-pill vh-badge-aberto px-3 py-2">
+    <i class="bi bi-pencil-square me-1"></i> Editando
+  </span>
+  {% endif %}
+</div>
+
+{% if form.non_field_errors %}
+<div class="alert alert-danger d-flex align-items-center gap-2 mb-4">
+  <i class="bi bi-exclamation-triangle-fill flex-shrink-0"></i>
+  <div>{{ form.non_field_errors }}</div>
+</div>
+{% endif %}
+
+<!-- Form card -->
+<form method="post" novalidate>
+  {% csrf_token %}
+
+  <div class="vh-form-card">
+    <!-- Header -->
+    <div class="vh-form-card-header d-flex align-items-center gap-3">
+      <div class="vh-icon-box vh-icon-purple">
+        <i class="bi bi-person-gear"></i>
+      </div>
+      <div>
+        <h6 class="fw-bold mb-0">Dados do Usuário</h6>
+        <small class="text-body-secondary">Campos com <span class="text-primary fw-bold">*</span> são obrigatórios</small>
+      </div>
+    </div>
+
+    <!-- Body -->
+    <div class="vh-form-card-body">
+      <div class="row g-4">
+
+        <!-- Identificação -->
+        <div class="col-lg-6">
+          <div class="vh-section h-100">
+            <div class="vh-section-title">
+              <i class="bi bi-person"></i> Identificação
+            </div>
+
+            <div class="mb-3">
+              <label for="id_username" class="form-label">Usuário <span class="text-primary">*</span></label>
+              {{ form.username }}
+              {% if form.username.errors %}<div class="text-danger small mt-1">{{ form.username.errors.0 }}</div>{% endif %}
+            </div>
+
+            <div class="row g-3">
+              <div class="col-sm-6">
+                <label for="id_first_name" class="form-label">Nome</label>
+                {{ form.first_name }}
+              </div>
+              <div class="col-sm-6">
+                <label for="id_last_name" class="form-label">Sobrenome</label>
+                {{ form.last_name }}
+              </div>
+            </div>
+
+            <div class="mt-3">
+              <label for="id_email" class="form-label">E-mail</label>
+              <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-envelope"></i></span>
+                {{ form.email }}
+              </div>
+              {% if form.email.errors %}<div class="text-danger small mt-1">{{ form.email.errors.0 }}</div>{% endif %}
+            </div>
+          </div>
+        </div>
+
+        <!-- Senha & Permissões -->
+        <div class="col-lg-6">
+          <div class="vh-section h-100">
+            <div class="vh-section-title">
+              <i class="bi bi-key"></i> Senha & Permissões
+            </div>
+
+            <div class="mb-3">
+              <label for="id_password1" class="form-label">
+                Senha {% if not form.instance.pk %}<span class="text-primary">*</span>{% endif %}
+              </label>
+              {{ form.password1 }}
+              {% if form.password1.errors %}<div class="text-danger small mt-1">{{ form.password1.errors.0 }}</div>{% endif %}
+              {% if form.instance.pk %}
+              <div class="text-body-secondary small mt-1"><i class="bi bi-info-circle me-1"></i>Deixe em branco para manter a senha atual</div>
+              {% endif %}
+            </div>
+
+            <div class="mb-3">
+              <label for="id_password2" class="form-label">
+                Confirmar Senha {% if not form.instance.pk %}<span class="text-primary">*</span>{% endif %}
+              </label>
+              {{ form.password2 }}
+              {% if form.password2.errors %}<div class="text-danger small mt-1">{{ form.password2.errors.0 }}</div>{% endif %}
+            </div>
+
+            <div class="d-flex gap-4 mt-3">
+              <div class="form-check">
+                {{ form.is_active }}
+                <label class="form-check-label small fw-semibold" for="id_is_active">Ativo</label>
+              </div>
+              <div class="form-check">
+                {{ form.is_staff }}
+                <label class="form-check-label small fw-semibold" for="id_is_staff">Staff / Admin</label>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="vh-form-card-footer d-flex justify-content-between align-items-center">
+      <a href="{% url 'accounts:usuario_lista' %}" class="btn btn-outline-secondary d-flex align-items-center gap-2">
+        <i class="bi bi-x-lg"></i> Cancelar
+      </a>
+      <button type="submit" class="btn btn-primary px-4 d-flex align-items-center gap-2 vh-btn-submit">
+        <i class="bi bi-check-lg"></i>
+        {% if form.instance.pk %}Salvar Alterações{% else %}Criar Usuário{% endif %}
+      </button>
+    </div>
+  </div>
+</form>
+
+{% endblock %}

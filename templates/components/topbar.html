@@ -1,0 +1,24 @@
+<header class="vh-topbar d-flex align-items-center justify-content-between">
+    <div class="d-flex align-items-center gap-2">
+        <!-- Mobile hamburger -->
+        <button class="btn btn-outline-secondary btn-sm d-lg-none border-0 text-body-secondary" type="button"
+                data-bs-toggle="offcanvas" data-bs-target="#sidebarMobile" aria-label="Menu">
+            <i class="bi bi-list fs-5"></i>
+        </button>
+        <div>
+            <h6 class="mb-0 fw-bold" style="color:var(--vh-gray-900)">{% block page_title %}{% endblock %}</h6>
+        </div>
+    </div>
+    <div class="d-flex align-items-center gap-2">
+        {% block topbar_actions %}{% endblock %}
+        <!-- User pill -->
+        <div class="d-none d-md-flex align-items-center gap-2 ps-2 border-start" style="border-color:var(--vh-border)!important">
+            <div class="vh-user-avatar" style="width:30px;height:30px;font-size:.72rem;">
+                {{ request.user.username|first|upper }}
+            </div>
+            <span class="small fw-semibold text-truncate" style="max-width:120px;color:var(--vh-gray-700)">
+                {{ request.user.get_full_name|default:request.user.username }}
+            </span>
+        </div>
+    </div>
+</header>

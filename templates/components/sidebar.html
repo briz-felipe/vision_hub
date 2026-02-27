@@ -1,0 +1,125 @@
+<!-- Sidebar — Desktop: fixed | Mobile: offcanvas -->
+<nav class="vh-sidebar d-none d-lg-flex flex-column" id="sidebarDesktop">
+    <!-- Brand -->
+    <div class="vh-brand d-flex align-items-center gap-2">
+        <div class="vh-brand-logo">
+            <i class="bi bi-eye-fill text-white fs-5"></i>
+        </div>
+        <div>
+            <h6 class="mb-0 fw-bold text-white" style="letter-spacing:-.02em">Vision Hub</h6>
+            <small class="text-white-50" style="font-size:.68rem;letter-spacing:.05em;text-transform:uppercase">Proceder</small>
+        </div>
+    </div>
+
+    <!-- Nav links -->
+    <ul class="nav flex-column gap-1 px-2 py-3 flex-grow-1">
+        <li class="nav-label">Menu</li>
+        <li class="nav-item">
+            <a href="{% url 'dashboard:index' %}" class="nav-link {% if request.resolver_match.app_name == 'dashboard' %}vh-active{% endif %}">
+                <i class="bi bi-grid-1x2-fill"></i>
+                <span>Dashboard</span>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a href="{% url 'chamados:lista' %}" class="nav-link {% if request.resolver_match.app_name == 'chamados' %}vh-active{% endif %}">
+                <i class="bi bi-file-earmark-text-fill"></i>
+                <span>Chamados</span>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a href="{% url 'clientes:lista' %}" class="nav-link {% if request.resolver_match.app_name == 'clientes' %}vh-active{% endif %}">
+                <i class="bi bi-people-fill"></i>
+                <span>Clientes</span>
+            </a>
+        </li>
+
+        <li class="nav-item">
+            <a href="{% url 'accounts:usuario_lista' %}" class="nav-link {% if request.resolver_match.url_name|slice:'0:7' == 'usuario' %}vh-active{% endif %}">
+                <i class="bi bi-shield-lock-fill"></i>
+                <span>Usuários</span>
+            </a>
+        </li>
+
+        <li class="nav-label mt-2">Ações Rápidas</li>
+        <li class="nav-item">
+            <a href="{% url 'chamados:criar' %}" class="nav-link">
+                <i class="bi bi-plus-circle-fill"></i>
+                <span>Novo Chamado</span>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a href="{% url 'clientes:criar' %}" class="nav-link">
+                <i class="bi bi-person-plus-fill"></i>
+                <span>Novo Cliente</span>
+            </a>
+        </li>
+    </ul>
+
+    <!-- Footer -->
+    <div class="vh-sidebar-footer">
+        <div class="d-flex align-items-center gap-2 mb-3">
+            <div class="vh-user-avatar">
+                {{ request.user.username|first|upper }}
+            </div>
+            <div class="overflow-hidden">
+                <div class="text-white fw-semibold text-truncate" style="font-size:.82rem;">
+                    {{ request.user.get_full_name|default:request.user.username }}
+                </div>
+                <small class="text-white-50" style="font-size:.68rem;letter-spacing:.04em;text-transform:uppercase">Administrador</small>
+            </div>
+        </div>
+        <a href="{% url 'accounts:mudar_senha' %}" class="nav-link py-1 px-2 text-white-50 small d-flex align-items-center gap-2 rounded-2">
+            <i class="bi bi-lock-fill"></i> Mudar Senha
+        </a>
+        <a href="{% url 'accounts:logout' %}" class="nav-link py-1 px-2 text-white-50 small d-flex align-items-center gap-2 rounded-2">
+            <i class="bi bi-box-arrow-right"></i> Sair
+        </a>
+    </div>
+</nav>
+
+<!-- Mobile offcanvas -->
+<div class="offcanvas offcanvas-start" tabindex="-1" id="sidebarMobile" style="width:260px;">
+    <div class="offcanvas-header" style="border-bottom:1px solid rgba(255,255,255,.07);">
+        <div class="d-flex align-items-center gap-2">
+            <div class="vh-brand-logo" style="width:34px;height:34px;">
+                <i class="bi bi-eye-fill text-white"></i>
+            </div>
+            <h6 class="mb-0 fw-bold text-white">Vision Hub</h6>
+        </div>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas"></button>
+    </div>
+    <div class="offcanvas-body d-flex flex-column p-0">
+        <ul class="nav flex-column gap-1 px-2 py-3 flex-grow-1">
+            <li class="nav-label text-white-50" style="font-size:.65rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:.5rem .75rem .1rem">Menu</li>
+            <li class="nav-item">
+                <a href="{% url 'dashboard:index' %}" class="nav-link {% if request.resolver_match.app_name == 'dashboard' %}vh-active{% endif %}">
+                    <i class="bi bi-grid-1x2-fill"></i> Dashboard
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="{% url 'chamados:lista' %}" class="nav-link {% if request.resolver_match.app_name == 'chamados' %}vh-active{% endif %}">
+                    <i class="bi bi-file-earmark-text-fill"></i> Chamados
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="{% url 'clientes:lista' %}" class="nav-link {% if request.resolver_match.app_name == 'clientes' %}vh-active{% endif %}">
+                    <i class="bi bi-people-fill"></i> Clientes
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="{% url 'accounts:usuario_lista' %}" class="nav-link {% if request.resolver_match.url_name|slice:'0:7' == 'usuario' %}vh-active{% endif %}">
+                    <i class="bi bi-shield-lock-fill"></i> Usuários
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="{% url 'chamados:criar' %}" class="nav-link">
+                    <i class="bi bi-plus-circle-fill"></i> Novo Chamado
+                </a>
+            </li>
+        </ul>
+        <div style="border-top:1px solid rgba(255,255,255,.07);padding:1rem;background:rgba(0,0,0,.1);">
+            <a href="{% url 'accounts:mudar_senha' %}" class="nav-link text-white-50 d-flex align-items-center gap-2 py-1 px-2 small rounded-2"><i class="bi bi-lock-fill"></i> Mudar Senha</a>
+            <a href="{% url 'accounts:logout' %}" class="nav-link text-white-50 d-flex align-items-center gap-2 py-1 px-2 small rounded-2"><i class="bi bi-box-arrow-right"></i> Sair</a>
+        </div>
+    </div>
+</div>

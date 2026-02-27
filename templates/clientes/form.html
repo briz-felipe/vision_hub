@@ -1,0 +1,364 @@
+{% extends 'base.html' %}
+
+{% block title %}{% if form.instance.pk %}Editar Cliente{% else %}Novo Cliente{% endif %} — VisionHub{% endblock %}
+
+{% block content %}
+
+<!-- ═══ Page header ═══ -->
+<div class="d-flex align-items-center justify-content-between mb-4">
+  <div class="d-flex align-items-center gap-3">
+    <a href="{% url 'clientes:lista' %}" class="btn btn-outline-secondary vh-btn-back" title="Voltar">
+      <i class="bi bi-arrow-left"></i>
+    </a>
+    <div>
+      <h4 class="fw-bold mb-0">{% if form.instance.pk %}Editar Cliente{% else %}Novo Cliente{% endif %}</h4>
+      <small class="text-body-secondary">Preencha as informações abaixo para {% if form.instance.pk %}atualizar{% else %}cadastrar{% endif %} o cliente.</small>
+    </div>
+  </div>
+  {% if form.instance.pk %}
+  <span class="badge rounded-pill vh-badge-aberto px-3 py-2">
+    <i class="bi bi-pencil-square me-1"></i> Editando
+  </span>
+  {% endif %}
+</div>
+
+{% if form.non_field_errors %}
+<div class="alert alert-danger d-flex align-items-center gap-2 mb-4">
+  <i class="bi bi-exclamation-triangle-fill flex-shrink-0"></i>
+  <div>{{ form.non_field_errors }}</div>
+</div>
+{% endif %}
+
+<!-- ═══ Main form card ═══ -->
+<form method="post" id="clienteForm">
+  {% csrf_token %}
+
+  <div class="vh-form-card">
+    <!-- Card header -->
+    <div class="vh-form-card-header d-flex align-items-center gap-3">
+      <div class="vh-icon-box vh-icon-purple">
+        <i class="bi bi-person-lines-fill"></i>
+      </div>
+      <div>
+        <h6 class="fw-bold mb-0">Dados do Cliente</h6>
+        <small class="text-body-secondary">Campos com <span class="text-primary fw-bold">*</span> são obrigatórios</small>
+      </div>
+    </div>
+
+    <!-- Card body -->
+    <div class="vh-form-card-body">
+
+      <!-- Row 1: Identificação + Contato -->
+      <div class="row g-4 mb-4">
+
+        <!-- ── Identificação ── -->
+        <div class="col-lg-7">
+          <div class="vh-section h-100">
+            <div class="vh-section-title">
+              <i class="bi bi-fingerprint"></i> Identificação
+            </div>
+
+            <!-- Tipo de pessoa -->
+            <div class="mb-3">
+              <label class="form-label">Tipo de Pessoa <span class="text-primary">*</span></label>
+              <div class="vh-type-toggle d-flex gap-2">
+                <input type="radio" class="btn-check" name="tipo_pessoa" id="tipo_pf" value="pf" autocomplete="off"
+                       {% if form.tipo_pessoa.value == 'pf' or not form.instance.pk %}checked{% endif %}>
+                <label class="btn" for="tipo_pf"><i class="bi bi-person me-1"></i> Pessoa Física</label>
+
+                <input type="radio" class="btn-check" name="tipo_pessoa" id="tipo_pj" value="pj" autocomplete="off"
+                       {% if form.tipo_pessoa.value == 'pj' %}checked{% endif %}>
+                <label class="btn" for="tipo_pj"><i class="bi bi-building me-1"></i> Pessoa Jurídica</label>
+              </div>
+            </div>
+
+            <!-- Nome / Razão -->
+            <div class="mb-3">
+              <label id="label_nome" for="id_nome" class="form-label">Nome Completo <span class="text-primary">*</span></label>
+              {{ form.nome }}
+              {% if form.nome.errors %}<div class="text-danger small mt-1">{{ form.nome.errors.0 }}</div>{% endif %}
+            </div>
+
+            <div class="row g-3">
+              <!-- CPF -->
+              <div class="col-sm-6" id="campo_cpf">
+                <label for="id_cpf" class="form-label">CPF <span class="text-primary">*</span></label>
+                <div class="input-group">
+                  <span class="input-group-text"><i class="bi bi-credit-card-2-front"></i></span>
+                  {{ form.cpf }}
+                </div>
+                {% if form.cpf.errors %}<div class="text-danger small mt-1">{{ form.cpf.errors.0 }}</div>{% endif %}
+              </div>
+
+              <!-- CNPJ -->
+              <div class="col-sm-6" id="campo_cnpj" style="display:none;">
+                <label for="id_cnpj" class="form-label">CNPJ <span class="text-primary">*</span></label>
+                <div class="input-group">
+                  <span class="input-group-text"><i class="bi bi-upc-scan"></i></span>
+                  {{ form.cnpj }}
+                  <button class="btn btn-outline-primary" type="button" id="btn_buscar_cnpj" title="Buscar dados do CNPJ">
+                    <i class="bi bi-search" id="cnpj_search_icon"></i>
+                  </button>
+                </div>
+                {% if form.cnpj.errors %}<div class="text-danger small mt-1">{{ form.cnpj.errors.0 }}</div>{% endif %}
+              </div>
+
+              <!-- Nome Fantasia (PJ) -->
+              <div class="col-12" id="campo_nome_fantasia" style="display:none;">
+                <label for="id_nome_fantasia" class="form-label">Nome Fantasia</label>
+                {{ form.nome_fantasia }}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── Contato ── -->
+        <div class="col-lg-5">
+          <div class="vh-section h-100">
+            <div class="vh-section-title">
+              <i class="bi bi-chat-square-dots"></i> Contato
+            </div>
+
+            <div class="mb-3">
+              <label for="id_telefone" class="form-label">Telefone</label>
+              <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-telephone"></i></span>
+                {{ form.telefone }}
+              </div>
+              {% if form.telefone.errors %}<div class="text-danger small mt-1">{{ form.telefone.errors.0 }}</div>{% endif %}
+            </div>
+
+            <div class="mb-3">
+              <label for="id_email" class="form-label">E-mail</label>
+              <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-envelope"></i></span>
+                {{ form.email }}
+              </div>
+              {% if form.email.errors %}<div class="text-danger small mt-1">{{ form.email.errors.0 }}</div>{% endif %}
+            </div>
+
+            <div class="mb-0">
+              <label for="id_complemento" class="form-label">Complemento</label>
+              {{ form.complemento }}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Row 2: Endereço (full width) -->
+      <div class="vh-section">
+        <div class="vh-section-title">
+          <i class="bi bi-geo-alt"></i> Endereço
+        </div>
+
+        <div class="row g-3">
+          <!-- CEP -->
+          <div class="col-md-3 col-sm-6">
+            <label for="id_cep" class="form-label">CEP</label>
+            <div class="input-group">
+              <span class="input-group-text"><i class="bi bi-mailbox"></i></span>
+              {{ form.cep }}
+              <button class="btn btn-outline-primary" type="button" id="btn_buscar_cep" title="Buscar endereço">
+                <i class="bi bi-search" id="cep_search_icon"></i>
+              </button>
+            </div>
+            <div class="text-body-secondary small mt-1"><i class="bi bi-info-circle me-1"></i>Digite e busque automaticamente</div>
+          </div>
+
+          <!-- Logradouro -->
+          <div class="col-md-5 col-sm-6">
+            <label for="id_logradouro" class="form-label">Logradouro</label>
+            {{ form.logradouro }}
+          </div>
+
+          <!-- Número -->
+          <div class="col-md-2 col-sm-4">
+            <label for="id_numero" class="form-label">Número</label>
+            {{ form.numero }}
+          </div>
+
+          <!-- Bairro -->
+          <div class="col-md-2 col-sm-4">
+            <label for="id_bairro" class="form-label">Bairro</label>
+            {{ form.bairro }}
+          </div>
+
+          <!-- Cidade -->
+          <div class="col-md-4 col-sm-6">
+            <label for="id_cidade" class="form-label">Cidade</label>
+            {{ form.cidade }}
+          </div>
+
+          <!-- Estado -->
+          <div class="col-md-2 col-sm-4">
+            <label for="id_estado" class="form-label">UF</label>
+            {{ form.estado }}
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Card footer / actions -->
+    <div class="vh-form-card-footer d-flex justify-content-between align-items-center">
+      <a href="{% url 'clientes:lista' %}" class="btn btn-outline-secondary d-flex align-items-center gap-2">
+        <i class="bi bi-x-lg"></i> Cancelar
+      </a>
+      <button type="submit" class="btn btn-primary px-4 d-flex align-items-center gap-2 vh-btn-submit">
+        <i class="bi bi-check-lg"></i>
+        {% if form.instance.pk %}Salvar Alterações{% else %}Cadastrar Cliente{% endif %}
+      </button>
+    </div>
+  </div>
+
+</form>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+
+  /* ── Toast ── */
+  function toast(msg, ok = true) {
+    const el = document.createElement('div');
+    el.className = `alert alert-${ok ? 'success' : 'danger'} alert-dismissible fade show d-flex align-items-center gap-2 shadow position-fixed bottom-0 end-0 m-3`;
+    el.style.cssText = 'z-index:9999;min-width:280px;border-radius:14px;';
+    el.innerHTML = `<i class="bi bi-${ok ? 'check-circle-fill' : 'exclamation-triangle-fill'}"></i>${msg}<button type="button" class="btn-close ms-auto" data-bs-dismiss="alert"></button>`;
+    document.body.appendChild(el);
+    setTimeout(() => el.remove(), 3500);
+  }
+
+  /* ── Helpers ── */
+  function setLoading(btn, icon, on) {
+    btn.disabled = on;
+    icon.className = on ? 'spinner-border spinner-border-sm' : 'bi bi-search';
+  }
+  function unlockAddressFields() {
+    ['id_estado','id_cidade','id_bairro','id_logradouro'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) { el.readOnly = false; el.classList.remove('bg-light'); }
+    });
+  }
+
+  /* ── Masks ── */
+  function maskCpf(v) {
+    v = v.replace(/\D/g,'').slice(0,11);
+    if (v.length > 9) return v.replace(/(\d{3})(\d{3})(\d{3})(\d{1,2})/,'$1.$2.$3-$4');
+    if (v.length > 6) return v.replace(/(\d{3})(\d{3})(\d{0,3})/,'$1.$2.$3');
+    if (v.length > 3) return v.replace(/(\d{3})(\d{0,3})/,'$1.$2');
+    return v;
+  }
+  function maskCnpj(v) {
+    v = v.replace(/\D/g,'').slice(0,14);
+    if (v.length > 12) return v.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{1,2})/,'$1.$2.$3/$4-$5');
+    if (v.length > 8)  return v.replace(/(\d{2})(\d{3})(\d{3})(\d{1,4})/,'$1.$2.$3/$4');
+    if (v.length > 5)  return v.replace(/(\d{2})(\d{3})(\d{0,3})/,'$1.$2.$3');
+    if (v.length > 2)  return v.replace(/(\d{2})(\d{0,3})/,'$1.$2');
+    return v;
+  }
+  function maskPhone(v) {
+    v = v.replace(/\D/g,'').slice(0,11);
+    if (v.length > 10) return v.replace(/(\d{2})(\d{5})(\d{4})/,'($1) $2-$3');
+    if (v.length > 6)  return v.replace(/(\d{2})(\d{4,5})(\d{0,4})/,'($1) $2-$3');
+    if (v.length > 2)  return v.replace(/(\d{2})(\d{0,5})/,'($1) $2');
+    return v;
+  }
+
+  const cpfEl  = document.getElementById('id_cpf');
+  const cnpjEl = document.getElementById('id_cnpj');
+  const foneEl = document.getElementById('id_telefone');
+  cpfEl?.addEventListener('input',  e => e.target.value = maskCpf(e.target.value));
+  cnpjEl?.addEventListener('input', e => e.target.value = maskCnpj(e.target.value));
+  foneEl?.addEventListener('input', e => e.target.value = maskPhone(e.target.value));
+
+  /* ── Tipo de Pessoa ── */
+  const tipoPf = document.getElementById('tipo_pf');
+  const tipoPj = document.getElementById('tipo_pj');
+
+  function alternarTipo() {
+    const isPf = tipoPf.checked;
+    document.getElementById('campo_cpf').style.display           = isPf ? '' : 'none';
+    document.getElementById('campo_cnpj').style.display          = isPf ? 'none' : '';
+    document.getElementById('campo_nome_fantasia').style.display = isPf ? 'none' : '';
+    document.getElementById('label_nome').innerHTML = isPf
+      ? 'Nome Completo <span class="text-primary">*</span>'
+      : 'Razão Social <span class="text-primary">*</span>';
+  }
+  tipoPf.addEventListener('change', alternarTipo);
+  tipoPj.addEventListener('change', alternarTipo);
+  alternarTipo();
+
+  /* ── CEP ── */
+  async function buscarCep() {
+    const cep = document.getElementById('id_cep').value.replace(/\D/g,'');
+    if (cep.length !== 8) { toast('Digite um CEP válido com 8 dígitos.', false); return; }
+
+    const btn  = document.getElementById('btn_buscar_cep');
+    const icon = document.getElementById('cep_search_icon');
+    setLoading(btn, icon, true);
+
+    try {
+      const res = await fetch(`https://brasilapi.com.br/api/cep/v1/${cep}`);
+      if (!res.ok) throw new Error();
+      const d = await res.json();
+      document.getElementById('id_logradouro').value = d.street       || '';
+      document.getElementById('id_bairro').value     = d.neighborhood || '';
+      document.getElementById('id_cidade').value     = d.city         || '';
+      document.getElementById('id_estado').value     = d.state        || '';
+      unlockAddressFields();
+      document.getElementById('id_numero').focus();
+      toast('Endereço preenchido com sucesso!');
+    } catch {
+      unlockAddressFields();
+      toast('CEP não encontrado. Preencha manualmente.', false);
+    } finally {
+      setLoading(btn, icon, false);
+    }
+  }
+
+  document.getElementById('btn_buscar_cep').addEventListener('click', buscarCep);
+  document.getElementById('id_cep').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); buscarCep(); } });
+  document.getElementById('id_cep').addEventListener('blur', () => {
+    if (document.getElementById('id_cep').value.replace(/\D/g,'').length === 8) buscarCep();
+  });
+
+  /* ── CNPJ ── */
+  async function buscarCnpj() {
+    const cnpj = document.getElementById('id_cnpj').value.replace(/\D/g,'');
+    if (cnpj.length !== 14) { toast('Digite um CNPJ válido com 14 dígitos.', false); return; }
+
+    const btn  = document.getElementById('btn_buscar_cnpj');
+    const icon = document.getElementById('cnpj_search_icon');
+    setLoading(btn, icon, true);
+
+    try {
+      const res = await fetch(`https://brasilapi.com.br/api/cnpj/v1/${cnpj}`);
+      if (!res.ok) throw new Error();
+      const d = await res.json();
+      document.getElementById('id_nome').value          = d.razao_social  || '';
+      document.getElementById('id_nome_fantasia').value = d.nome_fantasia || '';
+      document.getElementById('id_cep').value           = (d.cep || '').replace(/\D/g,'');
+      document.getElementById('id_logradouro').value    = d.logradouro    || '';
+      document.getElementById('id_numero').value        = d.numero        || '';
+      document.getElementById('id_complemento').value   = d.complemento   || '';
+      document.getElementById('id_bairro').value        = d.bairro        || '';
+      document.getElementById('id_cidade').value        = d.municipio     || '';
+      document.getElementById('id_estado').value        = d.uf            || '';
+      if (d.ddd_telefone_1) document.getElementById('id_telefone').value = maskPhone(d.ddd_telefone_1);
+      unlockAddressFields();
+      toast('Dados da empresa preenchidos automaticamente!');
+    } catch {
+      toast('CNPJ não encontrado na Receita Federal.', false);
+    } finally {
+      setLoading(btn, icon, false);
+    }
+  }
+
+  document.getElementById('btn_buscar_cnpj').addEventListener('click', buscarCnpj);
+  document.getElementById('id_cnpj').addEventListener('blur', () => {
+    if (document.getElementById('id_cnpj').value.replace(/\D/g,'').length === 14) buscarCnpj();
+  });
+});
+</script>
+{% endblock %}
